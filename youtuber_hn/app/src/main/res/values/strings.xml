@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">YoutuberHN</string>
+    <string name="app_full_name">De Cero a Youtuber en Honduras</string>
+    <string name="app_tagline">Tu guía para convertirte en YouTuber</string>
 </resources>
