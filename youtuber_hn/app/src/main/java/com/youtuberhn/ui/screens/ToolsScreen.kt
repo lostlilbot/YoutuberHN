@@ -8,10 +8,37 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.youtuberhn.R
+
+data class Tool(
+    val id: String,
+    val title: String,
+    val description: String
+)
+
+val toolsList = listOf(
+    Tool(
+        id = "idea_generator",
+        title = "Banco de Ideas Generator",
+        description = "Genera ideas de contenido basadas en tu nicho"
+    ),
+    Tool(
+        id = "recording_checker",
+        title = "Rincón de Grabación Checker",
+        description = "Evalúa tu espacio de grabación"
+    ),
+    Tool(
+        id = "schedule",
+        title = "Horario Óptimo de Publicación",
+        description = "Descubre el mejor momento para publicar"
+    ),
+    Tool(
+        id = "reminders",
+        title = "Recordatorios Diarios",
+        description = "Configurarecordatorios para grabar"
+    )
+)
 
 @Composable
 fun ToolsScreen(navController: NavHostController) {
@@ -21,20 +48,13 @@ fun ToolsScreen(navController: NavHostController) {
             style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier.padding(16.dp)
         )
-        Divider(modifier = Modifier.padding(16.dp))
-        
-        val tools = listOf(
-            "Banco de Ideas Generator",
-            "Rincón de Grabación Checker",
-            "Horario Óptimo de Publicación",
-            "Recordatorios Diarios"
-        )
+        Divider(modifier = Modifier.padding(horizontal = 16.dp))
         
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(tools) { tool ->
+            items(toolsList) { tool ->
                 ToolItem(
-                    toolName = tool,
-                    onClick = { navController.navigate("tool/${tool.replace(" ", "_")}") }
+                    tool = tool,
+                    onClick = { navController.navigate("tool/${tool.id}") }
                 )
             }
         }
@@ -42,7 +62,7 @@ fun ToolsScreen(navController: NavHostController) {
 }
 
 @Composable
-fun ToolItem(toolName: String, onClick: () -> Unit) {
+fun ToolItem(tool: Tool, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -50,15 +70,16 @@ fun ToolItem(toolName: String, onClick: () -> Unit) {
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = toolName,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            painter = painterResource(id = R.drawable.ic_tool),
-            contentDescription = "Herramienta",
-            modifier = Modifier.size(24.dp)
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = tool.title,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = tool.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

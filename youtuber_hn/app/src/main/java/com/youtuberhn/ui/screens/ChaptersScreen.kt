@@ -8,10 +8,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.youtuberhn.R
+import com.youtuberhn.data.BookContent
 
 @Composable
 fun ChaptersScreen(navController: NavHostController) {
@@ -22,23 +21,12 @@ fun ChaptersScreen(navController: NavHostController) {
             modifier = Modifier.padding(16.dp)
         )
         Divider(modifier = Modifier.padding(16.dp))
-        val chapters = listOf(
-            "Prólogo",
-            "Introducción",
-            "Capítulo 1: Cómo empezar",
-            "Capítulo 2: Equipo básico",
-            "Capítulo 3: Planificación de contenido",
-            "Capítulo 4: Grabación",
-            "Capítulo 5: Edición",
-            "Capítulo 6: Publicación",
-            "Capítulo 7: Monetización",
-            "Conclusión"
-        )
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(chapters) { chapter ->
+            items(BookContent.chapters) { chapter ->
                 ChapterItem(
-                    chapter = chapter,
-                    onClick = { navController.navigate("chapter/${chapter.replace(" ", "_")}") }
+                    chapterTitle = chapter.title,
+                    chapterId = chapter.id,
+                    onClick = { navController.navigate("chapter/${chapter.id}") }
                 )
             }
         }
@@ -46,7 +34,7 @@ fun ChaptersScreen(navController: NavHostController) {
 }
 
 @Composable
-fun ChapterItem(chapter: String, onClick: () -> Unit) {
+fun ChapterItem(chapterTitle: String, chapterId: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -55,16 +43,9 @@ fun ChapterItem(chapter: String, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = chapter,
+            text = chapterTitle,
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.weight(1f)
         )
-        if (chapter == "Capítulo 1: Cómo empezar") {
-            Text(
-                text = "Leído",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
     }
 }

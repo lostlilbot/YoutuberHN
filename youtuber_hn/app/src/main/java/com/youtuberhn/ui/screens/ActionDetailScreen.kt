@@ -14,40 +14,69 @@ import com.youtuberhn.data.BookContent
 @Composable
 fun ActionDetailScreen(navController: NavHostController, actionType: String) {
     Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = "Acción del Día",
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(16.dp)
-        )
-        Divider(modifier = Modifier.padding(16.dp))
+        val chapter = BookContent.chapters.find { it.id == actionType }
         
-        when {
-            actionType.contains("1") || actionType.contains("título") -> {
-                VideoTitlesAction()
+        chapter?.let {
+            Text(
+                text = it.actionTitle,
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.padding(16.dp)
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            
+            when (actionType) {
+                "capitulo1" -> VideoTitlesAction()
+                "capitulo2" -> EquipmentChecklistAction()
+                "capitulo3" -> ContentPlannerAction()
+                "capitulo4" -> GrabaPracticeAction(navController)
+                "capitulo5" -> VideoEditorAction()
+                "capitulo6" -> PublicacionPlanAction()
+                "capitulo7" -> MonetizationCalculatorAction()
+                else -> {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = it.actionDescription,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
             }
-            actionType.contains("2") || actionType.contains("equipo") -> {
-                EquipmentChecklistAction()
-            }
-            actionType.contains("3") || actionType.contains("planificador") -> {
-                ContentPlannerAction()
-            }
-            actionType.contains("4") || actionType.contains("graba") -> {
-                GrabaPracticeAction()
-            }
-            actionType.contains("5") || actionType.contains("editor") -> {
-                VideoEditorAction()
-            }
-            actionType.contains("6") || actionType.contains("publicación") -> {
-                PublicacionPlanAction()
-            }
-            actionType.contains("7") || actionType.contains("monetización") || actionType.contains("calculadora") -> {
-                MonetizationCalculatorAction()
-            }
-            else -> {
-                Text(
-                    text = "Acción no encontrada. Próximamente más acciones.",
-                    modifier = Modifier.padding(16.dp)
-                )
+        } ?: run {
+            Text(
+                text = "Acción del Día",
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.padding(16.dp)
+            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            
+            when {
+                actionType.contains("1") || actionType.contains("título") -> {
+                    VideoTitlesAction()
+                }
+                actionType.contains("2") || actionType.contains("equipo") -> {
+                    EquipmentChecklistAction()
+                }
+                actionType.contains("3") || actionType.contains("planificador") -> {
+                    ContentPlannerAction()
+                }
+                actionType.contains("4") || actionType.contains("graba") -> {
+                    GrabaPracticeAction(navController)
+                }
+                actionType.contains("5") || actionType.contains("editor") -> {
+                    VideoEditorAction()
+                }
+                actionType.contains("6") || actionType.contains("publicación") -> {
+                    PublicacionPlanAction()
+                }
+                actionType.contains("7") || actionType.contains("monetización") || actionType.contains("calculadora") -> {
+                    MonetizationCalculatorAction()
+                }
+                else -> {
+                    Text(
+                        text = "Acción no encontrada. Próximamente más acciones.",
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
     }
@@ -217,7 +246,7 @@ fun ContentPlannerAction() {
 }
 
 @Composable
-fun GrabaPracticeAction() {
+fun GrabaPracticeAction(navController: NavHostController) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
             text = "Capítulo 4: Graba 3 Minutos Ahora",
@@ -253,7 +282,7 @@ fun GrabaPracticeAction() {
         Spacer(modifier = Modifier.height(16.dp))
         
         Button(
-            onClick = { /* Open camera */ },
+            onClick = { navController.navigate("camera") },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Abrir Cámara")

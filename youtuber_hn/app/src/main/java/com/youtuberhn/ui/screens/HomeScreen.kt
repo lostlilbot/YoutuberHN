@@ -144,6 +144,15 @@ fun HomeScreen(navController: NavHostController) {
                 emoji = "⚙️",
                 onClick = { navController.navigate("extras") }
             )
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Grabar Video button
+            NavButton(
+                title = "🎬 Grabar Video",
+                description = "Abre la cámara para grabar",
+                emoji = "🎥",
+                onClick = { navController.navigate("camera") }
+            )
             
             Spacer(modifier = Modifier.height(32.dp))
         }

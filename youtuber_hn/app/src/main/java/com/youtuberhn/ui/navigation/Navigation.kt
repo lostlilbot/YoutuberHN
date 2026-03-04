@@ -12,7 +12,9 @@ import com.youtuberhn.ui.screens.ChapterDetailScreen
 import com.youtuberhn.ui.screens.ActionsScreen
 import com.youtuberhn.ui.screens.ActionDetailScreen
 import com.youtuberhn.ui.screens.ToolsScreen
+import com.youtuberhn.ui.screens.ToolDetailScreen
 import com.youtuberhn.ui.screens.ExtrasScreen
+import com.youtuberhn.ui.screens.CameraScreen
 
 @Composable
 fun Navigation(navController: NavHostController) {
@@ -29,11 +31,11 @@ fun Navigation(navController: NavHostController) {
         }
         
         composable(
-            route = "chapter/{chapterName}",
-            arguments = listOf(navArgument("chapterName") { type = NavType.StringType })
+            route = "chapter/{chapterId}",
+            arguments = listOf(navArgument("chapterId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val chapterName = backStackEntry.arguments?.getString("chapterName") ?: ""
-            ChapterDetailScreen(navController, chapterName)
+            val chapterId = backStackEntry.arguments?.getString("chapterId") ?: ""
+            ChapterDetailScreen(navController, chapterId)
         }
         
         composable("actions") {
@@ -52,8 +54,20 @@ fun Navigation(navController: NavHostController) {
             ToolsScreen(navController)
         }
         
+        composable(
+            route = "tool/{toolId}",
+            arguments = listOf(navArgument("toolId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val toolId = backStackEntry.arguments?.getString("toolId") ?: ""
+            ToolDetailScreen(navController, toolId)
+        }
+        
         composable("extras") {
             ExtrasScreen(navController)
+        }
+        
+        composable("camera") {
+            CameraScreen(navController)
         }
     }
 }
