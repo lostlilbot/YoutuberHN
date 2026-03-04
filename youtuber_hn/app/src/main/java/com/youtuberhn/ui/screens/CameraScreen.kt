@@ -1,8 +1,12 @@
 package com.youtuberhn.ui.screens
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
+import android.widget.MediaController
+import android.widget.VideoView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -11,8 +15,12 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -25,6 +33,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
 import java.io.File
 import java.text.SimpleDateFormat
@@ -56,11 +65,33 @@ fun CameraScreen(navController: NavHostController) {
     var videoCapture: VideoCapture<Recorder>? by remember { mutableStateOf(null) }
     var recordingStarted by remember { mutableStateOf(false) }
     
+    // Video gallery state
+    var showGallery by remember { mutableStateOf(false) }
+    var savedVideos by remember { mutableStateOf<List<File>>(emptyList()) }
+    var selectedVideo by remember { mutableStateOf<File?>(null) }
+    var showVideoPlayer by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var videoToDelete by remember { mutableStateOf<File?>(null) }
+    
+    // Last saved video path
+    var lastSavedVideoPath by remember { mutableStateOf<String?>(null) }
+    
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         hasCameraPermission = permissions[Manifest.permission.CAMERA] == true
         hasAudioPermission = permissions[Manifest.permission.RECORD_AUDIO] == true
+    }
+    
+    // Function to load saved videos
+    fun loadSavedVideos() {
+        val videosDir = context.getExternalFilesDir(null)
+        videosDir?.let { dir ->
+            val videos = dir.listFiles { file ->
+                file.isFile && file.name.endsWith(".mp4")
+            }?.sortedByDescending { it.lastModified() } ?: emptyList()
+            savedVideos = videos
+        }
     }
     
     LaunchedEffect(Unit) {
@@ -72,6 +103,113 @@ fun CameraScreen(navController: NavHostController) {
                 )
             )
         }
+        loadSavedVideos()
+    }
+    
+    // Gallery Dialog
+    if (showGallery) {
+        AlertDialog(
+            onDismissRequest = { showGallery = false },
+            title = { Text("Mis Videos") },
+            text = {
+                if (savedVideos.isEmpty()) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "🎬",
+                            style = MaterialTheme.typography.displayLarge,
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("No hay videos guardados")
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(savedVideos) { video ->
+                            VideoListItem(
+                                video = video,
+                                onPlay = {
+                                    selectedVideo = video
+                                    showVideoPlayer = true
+                                },
+                                onDelete = {
+                                    videoToDelete = video
+                                    showDeleteDialog = true
+                                }
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showGallery = false }) {
+                    Text("Cerrar")
+                }
+            }
+        )
+    }
+    
+    // Video Player Dialog
+    if (showVideoPlayer && selectedVideo != null) {
+        AlertDialog(
+            onDismissRequest = { showVideoPlayer = false },
+            title = { Text(selectedVideo!!.name) },
+            text = {
+                VideoPlayerView(
+                    videoFile = selectedVideo!!,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { showVideoPlayer = false }) {
+                    Text("Cerrar")
+                }
+            }
+        )
+    }
+    
+    // Delete Confirmation Dialog
+    if (showDeleteDialog && videoToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { 
+                showDeleteDialog = false
+                videoToDelete = null
+            },
+            title = { Text("Eliminar Video") },
+            text = { Text("¿Estás seguro de que quieres eliminar este video?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        videoToDelete?.let { video ->
+                            if (video.delete()) {
+                                loadSavedVideos()
+                            }
+                        }
+                        showDeleteDialog = false
+                        videoToDelete = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showDeleteDialog = false
+                    videoToDelete = null
+                }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
     
     Column(modifier = Modifier.fillMaxSize()) {
@@ -252,15 +390,27 @@ fun CameraScreen(navController: NavHostController) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Gallery button (placeholder)
+            // Gallery button
             IconButton(
-                onClick = { /* Open gallery */ }
+                onClick = { 
+                    loadSavedVideos()
+                    showGallery = true
+                }
             ) {
-                Text(
-                    text = "🖼️",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.size(32.dp)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "🎬",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Text(
+                        text = "Mis Videos",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
             
             // Record button
@@ -298,7 +448,10 @@ fun CameraScreen(navController: NavHostController) {
                                         }
                                         is VideoRecordEvent.Finalize -> {
                                             if (!recordEvent.hasError()) {
+                                                lastSavedVideoPath = recordEvent.outputResults.outputUri.toString()
                                                 Log.d("CameraScreen", "Video saved: ${recordEvent.outputResults.outputUri}")
+                                                // Reload videos after saving
+                                                loadSavedVideos()
                                             } else {
                                                 Log.e("CameraScreen", "Recording error: ${recordEvent.error}")
                                             }
@@ -335,13 +488,119 @@ fun CameraScreen(navController: NavHostController) {
             IconButton(
                 onClick = { useFrontCamera = !useFrontCamera }
             ) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Cambiar cámara",
-                    tint = Color.White,
-                    modifier = Modifier.size(32.dp)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "🔄",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Text(
+                        text = "Cambiar",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun VideoListItem(
+    video: File,
+    onPlay: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = video.name,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "${formatFileSize(video.length())} • ${dateFormat.format(Date(video.lastModified()))}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Row {
+                IconButton(onClick = onPlay) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Reproducir",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Eliminar",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun VideoPlayerView(
+    videoFile: File,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    
+    AndroidView(
+        factory = { ctx ->
+            VideoView(ctx).apply {
+                val uri = Uri.fromFile(videoFile)
+                setVideoURI(uri)
+                
+                val mediaController = MediaController(ctx)
+                mediaController.setAnchorView(this)
+                setMediaController(mediaController)
+                
+                setOnPreparedListener { mp ->
+                    mp.isLooping = false
+                    start()
+                }
+                
+                setOnErrorListener { _, _, _ ->
+                    true
+                }
+            }
+        },
+        modifier = modifier,
+        update = { videoView ->
+            val uri = Uri.fromFile(videoFile)
+            videoView.setVideoURI(uri)
+            videoView.start()
+        }
+    )
+}
+
+private fun formatFileSize(bytes: Long): String {
+    return when {
+        bytes < 1024 -> "$bytes B"
+        bytes < 1024 * 1024 -> "${bytes / 1024} KB"
+        else -> String.format("%.1f MB", bytes / (1024.0 * 1024.0))
     }
 }
