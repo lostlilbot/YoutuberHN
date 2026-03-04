@@ -1,6 +1,7 @@
 package com.youtuberhn.data
 
 import androidx.compose.ui.graphics.Color
+import com.youtuberhn.R
 
 data class Chapter(
     val id: String,
@@ -9,7 +10,8 @@ data class Chapter(
     val actionTitle: String,
     val actionDescription: String,
     val imageRes: Int? = null, // Resource ID for chapter image
-    val gradientColors: List<Long> = listOf(0xFFFF0000, 0xFFFF6B6B) // Default YouTube red gradient
+    val gradientColors: List<Long> = listOf(0xFFFF0000, 0xFFFF6B6B), // Default YouTube red gradient
+    val gradientDrawableRes: Int? = null // Drawable resource for gradient background
 )
 
 object BookContent {
@@ -26,7 +28,8 @@ Este libro no es una traducción de un manual gringo. Es una ruta de batalla cre
             """.trimIndent(),
             actionTitle = "Prepárate mentalmente",
             actionDescription = "Escribe 3 razones por las que querés ser YouTuber",
-            gradientColors = listOf(0xFF6B4EFF.toLong(), 0xFF9B7DFF.toLong()) // Purple
+            gradientColors = listOf(0xFF6B4EFF.toLong(), 0xFF9B7DFF.toLong()), // Purple
+            gradientDrawableRes = com.youtuberhn.R.drawable.chapter_prologo
         ),
         Chapter(
             id = "introduccion",
@@ -44,7 +47,8 @@ Ahora, prepárate. Deja las excusas. Vamos a empezar.
             """.trimIndent(),
             actionTitle = "Define tu nicho",
             actionDescription = "Escribe 5 temas que te apasionan y que podrías enseñar",
-            gradientColors = listOf(0xFF2196F3.toLong(), 0xFF64B5F6.toLong()) // Blue
+            gradientColors = listOf(0xFF2196F3.toLong(), 0xFF64B5F6.toLong()), // Blue
+            gradientDrawableRes = com.youtuberhn.R.drawable.chapter_introduccion
         ),
         Chapter(
             id = "capitulo1",
@@ -89,7 +93,8 @@ Acción del Día: Agarra tu cuaderno. Escribe 10 títulos de videos que te gusta
             """.trimIndent(),
             actionTitle = "Escribe 10 títulos de video",
             actionDescription = "Crea 10 títulos poderosos para tu canal usando la fórmula: Cómo [beneficio] en [lugar/tiempo] sin [problema común]",
-            gradientColors = listOf(0xFFFF0000.toLong(), 0xFFFF6B6B.toLong()) // YouTube Red
+            gradientColors = listOf(0xFFFF0000.toLong(), 0xFFFF6B6B.toLong()), // YouTube Red
+            gradientDrawableRes = com.youtuberhn.R.drawable.chapter_capitulo1
         ),
         Chapter(
             id = "capitulo2",
@@ -158,7 +163,8 @@ Tomá una foto de ese lugar. Ese será tu primer estudio de grabación.
             """.trimIndent(),
             actionTitle = "Equipment Checklist",
             actionDescription = "Revisa qué equipo tenés y marca lo que ya tenés. Planifica qué comprar primero.",
-            gradientColors = listOf(0xFF4CAF50.toLong(), 0xFF81C784.toLong()) // Green
+            gradientColors = listOf(0xFF4CAF50.toLong(), 0xFF81C784.toLong()), // Green
+            gradientDrawableRes = com.youtuberhn.R.drawable.chapter_capitulo2
         ),
         Chapter(
             id = "capitulo3",
@@ -227,7 +233,8 @@ Si no tenés 15 ideas ahora mismo, volvé a leer la sección 3.3 y 3.5.
             """.trimIndent(),
             actionTitle = "3x3 Content Planner",
             actionDescription = "Planifica tu mes con la fórmula 3x3: 3 Tanates, 3 Cacerías Diarias, y los Chanchuyos que aparezcan",
-            gradientColors = listOf(0xFFFF9800.toLong(), 0xFFFFB74D.toLong()) // Orange
+            gradientColors = listOf(0xFFFF9800.toLong(), 0xFFFFB74D.toLong()), // Orange
+            gradientDrawableRes = com.youtuberhn.R.drawable.chapter_capitulo3
         ),
         Chapter(
             id = "capitulo4",
@@ -320,7 +327,8 @@ Hoy no vas a publicar nada. Hoy vas a practicar.
             """.trimIndent(),
             actionTitle = "Graba 3 minutos ahora",
             actionDescription = "Abre la cámara y graba 3 minutos de práctica. Puede ser una intro, un mensaje, o lo que quieras practicar.",
-            gradientColors = listOf(0xFFE91E63.toLong(), 0xFFF06292.toLong()) // Pink
+            gradientColors = listOf(0xFFE91E63.toLong(), 0xFFF06292.toLong()), // Pink
+            gradientDrawableRes = com.youtuberhn.R.drawable.chapter_capitulo4
         ),
         Chapter(
             id = "capitulo5",
@@ -408,7 +416,8 @@ Abrí CapCut (o el programa que hayas elegido).
             """.trimIndent(),
             actionTitle = "Editor de video simple",
             actionDescription = "Edita tu video de práctica: importa el video, agrega texto introductorio y música de fondo",
-            gradientColors = listOf(0xFF00BCD4.toLong(), 0xFF4DD0E1.toLong()) // Cyan
+            gradientColors = listOf(0xFF00BCD4.toLong(), 0xFF4DD0E1.toLong()), // Cyan
+            gradientDrawableRes = com.youtuberhn.R.drawable.chapter_capitulo5
         ),
         Chapter(
             id = "capitulo6",
@@ -506,7 +515,8 @@ No subas nada hasta que esto esté listo.
             """.trimIndent(),
             actionTitle = "Planifica tu publicación",
             actionDescription = "Crea un calendario de publicación para los próximos 7 días",
-            gradientColors = listOf(0xFF9C27B0.toLong(), 0xFFBA68C8.toLong()) // Purple
+            gradientColors = listOf(0xFF9C27B0.toLong(), 0xFFBA68C8.toLong()), // Purple
+            gradientDrawableRes = com.youtuberhn.R.drawable.chapter_capitulo6
         ),
         Chapter(
             id = "capitulo7",
@@ -608,7 +618,8 @@ Aquí está tu ruta de acción para el primer año:
             """.trimIndent(),
             actionTitle = "Calculadora de monetización",
             actionDescription = "Ingresa tus vistas estimadas y ve cuánto podrías ganar en lempiras",
-            gradientColors = listOf(0xFFFFEB3B.toLong(), 0xFFFFF176.toLong()) // Yellow/Gold
+            gradientColors = listOf(0xFFFFEB3B.toLong(), 0xFFFFF176.toLong()), // Yellow/Gold
+            gradientDrawableRes = com.youtuberhn.R.drawable.chapter_capitulo7
         ),
         Chapter(
             id = "conclusion",
@@ -650,7 +661,8 @@ FIN DEL LIBRO
             """.trimIndent(),
             actionTitle = "¡Es tu momento!",
             actionDescription = "Escribe tu primer video hoy y comprométete a no parar",
-            gradientColors = listOf(0xFF4CAF50.toLong(), 0xFFA5D6A7.toLong()) // Green
+            gradientColors = listOf(0xFF4CAF50.toLong(), 0xFFA5D6A7.toLong()), // Green
+            gradientDrawableRes = com.youtuberhn.R.drawable.chapter_conclusion
         )
     )
 }
