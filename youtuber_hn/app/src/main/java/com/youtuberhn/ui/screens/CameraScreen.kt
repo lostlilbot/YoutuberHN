@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import android.widget.MediaController
 import android.widget.VideoView
@@ -39,6 +40,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executor
+import kotlinx.coroutines.launch
 
 @Composable
 fun CameraScreen(navController: NavHostController) {
@@ -59,6 +61,13 @@ fun CameraScreen(navController: NavHostController) {
         )
     }
     
+    var hasStoragePermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == 
+            PackageManager.PERMISSION_GRANTED
+        )
+    }
+    
     var isRecording by remember { mutableStateOf(false) }
     var recording: Recording? by remember { mutableStateOf(null) }
     var useFrontCamera by remember { mutableStateOf(false) }
@@ -73,35 +82,47 @@ fun CameraScreen(navController: NavHostController) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var videoToDelete by remember { mutableStateOf<File?>(null) }
     
-    // Last saved video path
-    var lastSavedVideoPath by remember { mutableStateOf<String?>(null) }
+    // Show snackbar for messages
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    // Get the videos directory - use app-specific external storage
+    fun getVideosDirectory(): File {
+        val videosDir = File(context.getExternalFilesDir(Environment.DIRECTORY_MOVIES), "YoutuberHN")
+        if (!videosDir.exists()) {
+            videosDir.mkdirs()
+        }
+        return videosDir
+    }
+    
+    // Function to load saved videos
+    fun loadSavedVideos() {
+        try {
+            val videosDir = getVideosDirectory()
+            val videos = videosDir.listFiles { file ->
+                file.isFile && (file.name.endsWith(".mp4") || file.name.endsWith(".3gp") || file.name.endsWith(".mkv"))
+            }?.sortedByDescending { it.lastModified() } ?: emptyList()
+            savedVideos = videos
+        } catch (e: Exception) {
+            Log.e("CameraScreen", "Error loading videos: ${e.message}")
+        }
+    }
     
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         hasCameraPermission = permissions[Manifest.permission.CAMERA] == true
         hasAudioPermission = permissions[Manifest.permission.RECORD_AUDIO] == true
-    }
-    
-    // Function to load saved videos
-    fun loadSavedVideos() {
-        val videosDir = context.getExternalFilesDir(null)
-        videosDir?.let { dir ->
-            val videos = dir.listFiles { file ->
-                file.isFile && file.name.endsWith(".mp4")
-            }?.sortedByDescending { it.lastModified() } ?: emptyList()
-            savedVideos = videos
-        }
+        hasStoragePermission = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true
     }
     
     LaunchedEffect(Unit) {
-        if (!hasCameraPermission || !hasAudioPermission) {
-            permissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO
-                )
-            )
+        val permissionsToRequest = mutableListOf<String>()
+        if (!hasCameraPermission) permissionsToRequest.add(Manifest.permission.CAMERA)
+        if (!hasAudioPermission) permissionsToRequest.add(Manifest.permission.RECORD_AUDIO)
+        if (!hasStoragePermission) permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        
+        if (permissionsToRequest.isNotEmpty()) {
+            permissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
         loadSavedVideos()
     }
@@ -426,10 +447,8 @@ fun CameraScreen(navController: NavHostController) {
                         videoCapture?.let { vc ->
                             val name = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
                                 .format(System.currentTimeMillis())
-                            val videoFile = File(
-                                context.getExternalFilesDir(null),
-                                "YoutuberHN_$name.mp4"
-                            )
+                            val videosDir = getVideosDirectory()
+                            val videoFile = File(videosDir, "YoutuberHN_$name.mp4")
                             
                             val outputOptions = FileOutputOptions.Builder(videoFile).build()
                             
@@ -448,12 +467,19 @@ fun CameraScreen(navController: NavHostController) {
                                         }
                                         is VideoRecordEvent.Finalize -> {
                                             if (!recordEvent.hasError()) {
-                                                lastSavedVideoPath = recordEvent.outputResults.outputUri.toString()
-                                                Log.d("CameraScreen", "Video saved: ${recordEvent.outputResults.outputUri}")
+                                                val savedPath = videoFile.absolutePath
+                                                Log.d("CameraScreen", "Video saved successfully to: $savedPath")
                                                 // Reload videos after saving
                                                 loadSavedVideos()
+                                                // Show success message
+                                                kotlinx.coroutines.GlobalScope.launch {
+                                                    snackbarHostState.showSnackbar("Video guardado: $savedPath")
+                                                }
                                             } else {
                                                 Log.e("CameraScreen", "Recording error: ${recordEvent.error}")
+                                                kotlinx.coroutines.GlobalScope.launch {
+                                                    snackbarHostState.showSnackbar("Error al guardar video")
+                                                }
                                             }
                                         }
                                     }

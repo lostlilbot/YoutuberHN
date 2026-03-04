@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -22,6 +23,7 @@ import com.youtuberhn.ui.screens.ToolDetailScreen
 import com.youtuberhn.ui.screens.ExtrasScreen
 import com.youtuberhn.ui.screens.CameraScreen
 import com.youtuberhn.ui.screens.LandingScreen
+import kotlinx.coroutines.launch
 
 // Routes that should show the drawer
 val drawerRoutes = setOf("home", "chapters", "actions", "tools", "extras", "camera")
@@ -37,17 +39,23 @@ fun Navigation(navController: NavHostController) {
     
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     
+    // Scope for coroutine operations
+    val scope = rememberCoroutineScope()
+    
     if (showDrawer) {
         ModalNavigationDrawer(
             drawerState = drawerState,
             drawerContent = {
                 DrawerContent(
                     navController = navController,
-                    onCloseDrawer = { 
-                        // Use run to execute suspend function in coroutine scope
+                    onCloseDrawer = {
+                        scope.launch {
+                            drawerState.close()
+                        }
                     }
                 )
-            }
+            },
+            gesturesEnabled = true
         ) {
             Scaffold(
                 topBar = {
@@ -67,8 +75,14 @@ fun Navigation(navController: NavHostController) {
                                 )
                             },
                             navigationIcon = {
-                                IconButton(onClick = { 
-                                    // Open drawer - handle suspend function properly
+                                IconButton(onClick = {
+                                    scope.launch {
+                                        if (drawerState.isClosed) {
+                                            drawerState.open()
+                                        } else {
+                                            drawerState.close()
+                                        }
+                                    }
                                 }) {
                                     Icon(
                                         imageVector = Icons.Default.Menu,
