@@ -7,7 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.youtuberhn.data.BookContent
@@ -151,6 +155,9 @@ fun ExtrasScreen(navController: NavHostController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchResultItem(chapterTitle: String, searchQuery: String, onClick: () -> Unit) {
+    val matchingChapter = BookContent.chapters.find { it.title == chapterTitle }
+    val snippet = matchingChapter?.content?.take(200) ?: ""
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -161,10 +168,41 @@ fun SearchResultItem(chapterTitle: String, searchQuery: String, onClick: () -> U
             Text(
                 text = chapterTitle,
                 style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            // Show content snippet with highlighted search terms
+            Text(
+                text = buildAnnotatedString {
+                    val lowerContent = snippet.lowercase()
+                    val lowerQuery = searchQuery.lowercase()
+                    var lastIndex = 0
+                    var index = lowerContent.indexOf(lowerQuery)
+                    
+                    while (index >= 0 && index < snippet.length) {
+                        append(snippet.substring(lastIndex, index))
+                        withStyle(SpanStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )) {
+                            append(snippet.substring(index, index + searchQuery.length))
+                        }
+                        lastIndex = index + searchQuery.length
+                        index = lowerContent.indexOf(lowerQuery, lastIndex)
+                    }
+                    append(snippet.substring(lastIndex))
+                    if (lastIndex == 0 && snippet.isNotEmpty()) {
+                        append("...")
+                    }
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Toca para ver el capítulo completo",
                 style = MaterialTheme.typography.bodySmall,

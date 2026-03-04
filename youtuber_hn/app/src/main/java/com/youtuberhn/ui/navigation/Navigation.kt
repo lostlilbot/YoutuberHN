@@ -15,13 +15,18 @@ import com.youtuberhn.ui.screens.ToolsScreen
 import com.youtuberhn.ui.screens.ToolDetailScreen
 import com.youtuberhn.ui.screens.ExtrasScreen
 import com.youtuberhn.ui.screens.CameraScreen
+import com.youtuberhn.ui.screens.LandingScreen
 
 @Composable
 fun Navigation(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "landing"
     ) {
+        composable("landing") {
+            LandingScreen(navController)
+        }
+        
         composable("home") {
             HomeScreen(navController)
         }

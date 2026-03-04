@@ -1,11 +1,15 @@
 package com.youtuberhn.data
 
+import androidx.compose.ui.graphics.Color
+
 data class Chapter(
     val id: String,
     val title: String,
     val content: String,
     val actionTitle: String,
-    val actionDescription: String
+    val actionDescription: String,
+    val imageRes: Int? = null, // Resource ID for chapter image
+    val gradientColors: List<Long> = listOf(0xFFFF0000, 0xFFFF6B6B) // Default YouTube red gradient
 )
 
 object BookContent {
@@ -21,7 +25,8 @@ Honduras tiene desafíos únicos: internet inestable, falta de inversión local 
 Este libro no es una traducción de un manual gringo. Es una ruta de batalla creada desde y para la realidad hondureña. Te enseñaré a grabar con 3,000 lempiras de equipo, a sortear los cortes de luz y a ganar tus primeros dólares aunque los bancos locales no entiendan de PayPal.
             """.trimIndent(),
             actionTitle = "Prepárate mentalmente",
-            actionDescription = "Escribe 3 razones por las que querés ser YouTuber"
+            actionDescription = "Escribe 3 razones por las que querés ser YouTuber",
+            gradientColors = listOf(0xFF6B4EFF.toLong(), 0xFF9B7DFF.toLong()) // Purple
         ),
         Chapter(
             id = "introduccion",
@@ -38,7 +43,8 @@ Al terminar los 7 capítulos, tendrás un canal estructurado, 10 ideas de video 
 Ahora, prepárate. Deja las excusas. Vamos a empezar.
             """.trimIndent(),
             actionTitle = "Define tu nicho",
-            actionDescription = "Escribe 5 temas que te apasionan y que podrías enseñar"
+            actionDescription = "Escribe 5 temas que te apasionan y que podrías enseñar",
+            gradientColors = listOf(0xFF2196F3.toLong(), 0xFF64B5F6.toLong()) // Blue
         ),
         Chapter(
             id = "capitulo1",
@@ -82,7 +88,8 @@ Estrategia del Campesino Digital:
 Acción del Día: Agarra tu cuaderno. Escribe 10 títulos de videos que te gustaría hacer basados en los nichos de arriba. Si no podés escribir 10, este capítulo no está completo. Volvé a leerlo.
             """.trimIndent(),
             actionTitle = "Escribe 10 títulos de video",
-            actionDescription = "Crea 10 títulos poderosos para tu canal usando la fórmula: Cómo [beneficio] en [lugar/tiempo] sin [problema común]"
+            actionDescription = "Crea 10 títulos poderosos para tu canal usando la fórmula: Cómo [beneficio] en [lugar/tiempo] sin [problema común]",
+            gradientColors = listOf(0xFFFF0000.toLong(), 0xFFFF6B6B.toLong()) // YouTube Red
         ),
         Chapter(
             id = "capitulo2",
@@ -128,9 +135,9 @@ El Cuarto Alfombrado: El sonido rebota en paredes lisas. Si tu cuarto tiene eco 
 
 2.5 El Vestuario: La Maldición de las Rayas
 
-Ley 1: No uses camisas con rayas muy finas o cuadros muy pequeños. En cámara, eso crea un efecto de "moiré" que vib al espectador.
+Ley 1: No uses camisas con rayas muy finas o cuadros muy pequeños. En cámara, eso crea un efecto de "moiré" que vibra y distrae.
 
-Leyra y distrae 2: No uses ropa con letras muy pequeñas. La gente no las va a leer y ensucia la imagen.
+Ley 2: No uses ropa con letras muy pequeñas. La gente no las va a leer y ensucia la imagen.
 
 Ley 3: Usá colores sólidos. Una camisa de color sólido (azul, rojo, verde, negro) te hace ver más profesional que una camisa de la selección (a menos que tu canal sea de fútbol).
 
@@ -138,7 +145,7 @@ Ley 3: Usá colores sólidos. Una camisa de color sólido (azul, rojo, verde, ne
 
 No necesitás una oficina. Necesitás un rincón de tu casa al que puedas controlar.
 
-El Fondo: Si grabás en tu cuarto, ordená la cama. Si grabás en la sala, poné una planta de fondo. El desorden visual mata el engagement. Si tu fondo es una pared blanca y fea, comprá una cortina barata y ponela de fondo.
+El Fondo: Si grabás en tu cuarto, ordená la cama. Si grabás en la sala, poné una planta de fondo. El desorden visual mata el engagement. Si tu fondo es una pared blanca y fea, comprá una cortina barato y ponela de fondo.
 
 La Privacidad: Dile a tu familia: "Voy a grabar por una hora, no entren, no hablen duro, no pongan música, no golpeen puertas". Si no lo hacés, en medio de tu mejor explicación, saldré tu abuela preguntando "¿querés café?".
 
@@ -150,7 +157,8 @@ Sin gastar dinero aún, recorré tu casa y encontrá tu "Rincón de Grabación".
 Tomá una foto de ese lugar. Ese será tu primer estudio de grabación.
             """.trimIndent(),
             actionTitle = "Equipment Checklist",
-            actionDescription = "Revisa qué equipo tenés y marca lo que ya tenés. Planifica qué comprar primero."
+            actionDescription = "Revisa qué equipo tenés y marca lo que ya tenés. Planifica qué comprar primero.",
+            gradientColors = listOf(0xFF4CAF50.toLong(), 0xFF81C784.toLong()) // Green
         ),
         Chapter(
             id = "capitulo3",
@@ -218,7 +226,8 @@ Agarra tu cuaderno y creá tu primer "Banco de Ideas".
 Si no tenés 15 ideas ahora mismo, volvé a leer la sección 3.3 y 3.5.
             """.trimIndent(),
             actionTitle = "3x3 Content Planner",
-            actionDescription = "Planifica tu mes con la fórmula 3x3: 3 Tanates, 3 Cacerías Diarias, y los Chanchuyos que aparezcan"
+            actionDescription = "Planifica tu mes con la fórmula 3x3: 3 Tanates, 3 Cacerías Diarias, y los Chanchuyos que aparezcan",
+            gradientColors = listOf(0xFFFF9800.toLong(), 0xFFFFB74D.toLong()) // Orange
         ),
         Chapter(
             id = "capitulo4",
@@ -254,11 +263,11 @@ Cuando grabás con el celular, es fácil distraerte mirándote a vos mismo en la
 
 El Error: Si mirás la pantalla, en el video parecerá que estás viendo a un lado, no al público.
 
-La Solución: Pegá un pedazo de cinta adhesiva o un post-it justo al lado de la cámara delantera. Mirá fijamente a ese punto. Así, en el video, parecerá que estás mirando directamente a los ojos de tus espectadores. Eso crea conexión.
+La Solución: Pegá un pedazo de cinta adhesiva o un post-it justo al lado de la cámara delante. Mirá fijamente a ese punto. Así, en el video, parecerá que estás mirando directamente a los ojos de tus espectadores. Eso crea conexión.
 
 4.4 El Talento: Cómo Hablar Sin Morir de Pánico
 
-Hablar solo frente a una cámara es antinatural. Al principio te dará vergüenza. Tu voz sonará extraña. Te vas a trancar.
+Hablar solo frente a una cámara es antinatural. Al principio te dará vergüenza. Tu voz suena diferente. Te vas a trancar.
 
 El Método del Chicle: No intentés ser perfecto. Los YouTubers exitosos no son perfectos, son auténticos. Si te trabás, reíte, corregí y seguí. Eso se puede editar.
 
@@ -310,7 +319,8 @@ Hoy no vas a publicar nada. Hoy vas a practicar.
 5. Borralo si querés. El objetivo no era el video, era perderle el miedo a la cámara.
             """.trimIndent(),
             actionTitle = "Graba 3 minutos ahora",
-            actionDescription = "Abre la cámara y graba 3 minutos de práctica. Puede ser una intro, un mensaje, o lo que quieras practicar."
+            actionDescription = "Abre la cámara y graba 3 minutos de práctica. Puede ser una intro, un mensaje, o lo que quieras practicar.",
+            gradientColors = listOf(0xFFE91E63.toLong(), 0xFFF06292.toLong()) // Pink
         ),
         Chapter(
             id = "capitulo5",
@@ -397,7 +407,8 @@ Abrí CapCut (o el programa que hayas elegido).
 5. Exportá el video y míralo. Acabás de hacer tu primer video editado. Aunque sea malo, lo hiciste. Eso es un avance.
             """.trimIndent(),
             actionTitle = "Editor de video simple",
-            actionDescription = "Edita tu video de práctica: importa el video, agrega texto introductorio y música de fondo"
+            actionDescription = "Edita tu video de práctica: importa el video, agrega texto introductorio y música de fondo",
+            gradientColors = listOf(0xFF00BCD4.toLong(), 0xFF4DD0E1.toLong()) // Cyan
         ),
         Chapter(
             id = "capitulo6",
@@ -448,9 +459,9 @@ El Método del Madrugador: Levantate a las 4 o 5 de la mañana a subir el video.
 
 El Café con WiFi: Ve a un lugar con WiFi público (un café, un parque, la casa de un familiar con fibra óptica). Llevá tu laptop o tu celular con el video ya exportado en un USB OTG (adaptador). Pedí un café, conectate y subilo.
 
-6.4 Después de Publicar: Los Primeros 60 Minutos (La Hora Santa2 horas después de publicar son sagradas)
+6.4 Después de Publicar: Los Primeros 60 Minutos (La Hora Santa)
 
-Las primeras . YouTube mira si tu video está generando tracción.
+Las primeras 2 horas después de publicar son sagradas. YouTube mira si tu video está generando tracción.
 
 El Golpe Inicial: Compartí el video inmediatamente en:
 - Tus estados de WhatsApp (los hondureños vivimos en WhatsApp).
@@ -494,7 +505,8 @@ Agenda tu primer video. Definí:
 No subas nada hasta que esto esté listo.
             """.trimIndent(),
             actionTitle = "Planifica tu publicación",
-            actionDescription = "Crea un calendario de publicación para los próximos 7 días"
+            actionDescription = "Crea un calendario de publicación para los próximos 7 días",
+            gradientColors = listOf(0xFF9C27B0.toLong(), 0xFFBA68C8.toLong()) // Purple
         ),
         Chapter(
             id = "capitulo7",
@@ -504,7 +516,7 @@ Llegamos al capítulo que todos esperan: la plata. Porque está bien tener sueñ
 
 7.1 Los Requisitos para Monetizar en 2026 (El Pacto con el Diablo)
 
-Para que YouTube te pague, necesitás cumplir estos requisitos (y no, no hay atajos):
+Para que YouTube te paga, necesitás cumplir estos requisitos (y no, no hay atajos):
 
 1. 1000 suscriptores: La comunidad. Gente que voluntariamente dijo "quiero ver más de este catracho".
 2. 4000 horas de visualización en el último año: Esto equivale a que la gente vea tus videos, no solo que haga click. Esto es más difícil que los suscriptores.
@@ -557,7 +569,7 @@ En Honduras, los anuncios de YouTube (Adsense) pagan muy bajo (CPM bajo). Un vid
 
 El Patrocinio Local (La Mina de Oro):
 - Cuando tengas un canal con 2000-3000 vistas por video, negocios locales te pagarán por aparecer.
-- Ejemplo: Si tenés un canal de comida, andá a una pupusería y deciles: "Les hago un video mostrando su negocio y cómo hacen las pupusas por $50 dólares (1200 lempiras)". Para ellos, es publicidad barata. Para ti, es más de lo que te pagaría YouTube.
+- Ejemplo: Si tenés un canal de comida, andá a una pupusería y deciles: "Les hago un video mostrando su negocio y cómo hacen las pupusas por $50 dólares (1200 lempiras)". Para ellos, es publicidad barato. Para ti, es más de lo que te pagaría YouTube.
 - Negocios que pagan: Restaurantes, tiendas de ropa, talleres mecánicos, universidades, ventas de celulares, marcas de energía.
 
 El Marketing de Afiliados:
@@ -565,7 +577,7 @@ El Marketing de Afiliados:
 - En tus videos de tecnología o productos, dejás un link: "Comprá este celular aquí". Si alguien compra, vos ganás comisión.
 
 Vender tu Propio Producto (El Sueño):
-- Una vez que tenés una audiencia que confía en vos, podés vender:
+- Una vez que tenés una audiencia que confiar en vos, podés vender:
 - Cursos: "Aprende a hacer baleadas profesionales" (si tu nicho es cocina).
 - Ebooks: "Guía para sobrevivir en Honduras" (si tu nicho es estilo de vida).
 - Camisetas o tazas: Con frases hondureñas o de tu canal.
@@ -595,7 +607,8 @@ Aquí está tu ruta de acción para el primer año:
 • Meses 10-12: Ya monetizado. Empezá a buscar tu primer patrocinio local. Llegarás a 2000-3000 suscriptores si mantenés la calidad.
             """.trimIndent(),
             actionTitle = "Calculadora de monetización",
-            actionDescription = "Ingresa tus vistas estimadas y ve cuánto podrías ganar en lempiras"
+            actionDescription = "Ingresa tus vistas estimadas y ve cuánto podrías ganar en lempiras",
+            gradientColors = listOf(0xFFFFEB3B.toLong(), 0xFFFFF176.toLong()) // Yellow/Gold
         ),
         Chapter(
             id = "conclusion",
@@ -636,7 +649,8 @@ Ahora, la pelota está en tu cancha.
 FIN DEL LIBRO
             """.trimIndent(),
             actionTitle = "¡Es tu momento!",
-            actionDescription = "Escribe tu primer video hoy y comprométete a no parar"
+            actionDescription = "Escribe tu primer video hoy y comprométete a no parar",
+            gradientColors = listOf(0xFF4CAF50.toLong(), 0xFFA5D6A7.toLong()) // Green
         )
     )
 }
