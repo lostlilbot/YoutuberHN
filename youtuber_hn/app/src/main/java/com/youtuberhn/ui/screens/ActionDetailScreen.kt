@@ -441,7 +441,7 @@ fun MonetizationCalculatorAction() {
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "CPM (costo por mil anuncios): L. ${cpm * 24:.2f} (aproximado)",
+            text = "CPM (costo por mil anuncios): L. ${String.format("%.2f", cpm * 24)} (aproximado)",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -464,13 +464,13 @@ fun MonetizationCalculatorAction() {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "L. ${estimatedEarnings * 24:.2f}",
+                    text = "L. ${String.format("%.2f", estimatedEarnings * 24)}",
                     style = MaterialTheme.typography.displaySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "(${estimatedEarnings:.2f} USD)",
+                    text = "(${String.format("%.2f", estimatedEarnings)} USD)",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

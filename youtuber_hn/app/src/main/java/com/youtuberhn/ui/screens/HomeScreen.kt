@@ -89,7 +89,7 @@ fun HomeScreen(navController: NavHostController) {
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     LinearProgressIndicator(
-                        progress = { progress },
+                        progress = progress,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp),
@@ -103,7 +103,7 @@ fun HomeScreen(navController: NavHostController) {
             Text(
                 text = "Explora la Guía",
                 style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.align(Alignment.Start)
+                modifier = Modifier.padding(horizontal = 0.dp)
             )
             
             Spacer(modifier = Modifier.height(16.dp))
