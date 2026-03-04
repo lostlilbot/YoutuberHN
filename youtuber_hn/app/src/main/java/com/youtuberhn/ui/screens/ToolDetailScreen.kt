@@ -1,5 +1,11 @@
 package com.youtuberhn.ui.screens
 
+import android.app.AlarmManager
+import android.app.TimePickerDialog
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -7,10 +13,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-
-@Composable
+import com.youtuberhn.ReminderBroadcastReceiver
+import java.util.*@Composable
 fun ToolDetailScreen(navController: NavHostController, toolId: String) {
     val tool = toolsList.find { it.id == toolId }
     
@@ -282,63 +289,332 @@ fun ScheduleContent() {
 
 @Composable
 fun RemindersContent() {
-    var reminderTime by remember { mutableStateOf("") }
-    var reminderDays by remember { mutableStateOf(listOf<String>()) }
-    val days = listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+    var reminderTime by remember { mutableStateOf("08:00") }
+    var reminderDays by remember { mutableStateOf(setOf<String>()) }
+    var isNotificationPermissionGranted by remember { mutableStateOf(false) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
     
-    Text(
-        text = "Configura recordatorios para grabar:",
-        style = MaterialTheme.typography.titleMedium
+    val context = LocalContext.current
+    val days = listOf(
+        "Lunes" to Calendar.MONDAY,
+        "Martes" to Calendar.TUESDAY,
+        "Miércoles" to Calendar.WEDNESDAY,
+        "Jueves" to Calendar.THURSDAY,
+        "Viernes" to Calendar.FRIDAY,
+        "Sábado" to Calendar.SATURDAY,
+        "Domingo" to Calendar.SUNDAY
     )
-    Spacer(modifier = Modifier.height(16.dp))
     
-    Text(
-        text = "Selecciona los días:",
-        style = MaterialTheme.typography.bodyMedium
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    
-    days.forEach { day ->
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = reminderDays.contains(day),
-                onCheckedChange = { checked ->
-                    reminderDays = if (checked) {
-                        reminderDays + day
-                    } else {
-                        reminderDays - day
-                    }
-                }
-            )
-            Text(text = day, modifier = Modifier.padding(start = 8.dp))
+    // Check notification permission
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            isNotificationPermissionGranted = context.checkSelfPermission(
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        } else {
+            isNotificationPermissionGranted = true
         }
     }
     
-    Spacer(modifier = Modifier.height(16.dp))
+    // Function to schedule notifications
+    fun scheduleReminders() {
+        if (!isNotificationPermissionGranted) {
+            showPermissionDialog = true
+            return
+        }
+        
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        
+        // Schedule for each selected day
+        reminderDays.forEach { dayName ->
+            val calendar = Calendar.getInstance().apply {
+                val dayOfWeek = days.find { it.first == dayName }?.second ?: return@forEach
+                set(Calendar.DAY_OF_WEEK, dayOfWeek)
+                
+                // Parse time
+                val timeParts = reminderTime.split(":")
+                set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
+                set(Calendar.MINUTE, timeParts[1].toInt())
+                set(Calendar.SECOND, 0)
+                
+                // If time has passed this week, schedule for next week
+                if (timeInMillis <= System.currentTimeMillis()) {
+                    add(Calendar.WEEK_OF_YEAR, 1)
+                }
+            }
+            
+            val intent = Intent(context, ReminderBroadcastReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                dayName.hashCode(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                }
+            } catch (e: SecurityException) {
+                // Handle case where exact alarm permission is not granted
+            }
+        }
+    }
     
-    if (reminderDays.isNotEmpty()) {
+    // Permission dialog
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text("Permiso de Notificaciones") },
+            text = { Text("Para recibir recordatorios, por favor permite las notificaciones en la configuración.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermissionDialog = false
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                        }
+                        context.startActivity(intent)
+                    }
+                }) {
+                    Text("Abrir Configuración")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+    
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Header with icon
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             )
         ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "🔔",
+                    style = MaterialTheme.typography.displaySmall
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = "Recordatorios de Grabación",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "No olvides crear tu contenido diario",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(
+            text = "Selecciona la hora:",
+            style = MaterialTheme.typography.titleSmall
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Time picker button
+        OutlinedButton(
+            onClick = {
+                val timeParts = reminderTime.split(":")
+                val hour = timeParts[0].toInt()
+                val minute = timeParts[1].toInt()
+                
+                TimePickerDialog(
+                    context,
+                    { _, selectedHour, selectedMinute ->
+                        reminderTime = String.format("%02d:%02d", selectedHour, selectedMinute)
+                    },
+                    hour,
+                    minute,
+                    true
+                ).show()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("🕐 Hora: $reminderTime")
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(
+            text = "Selecciona los días:",
+            style = MaterialTheme.typography.titleSmall
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        days.forEach { (dayName, _) ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = reminderDays.contains(dayName),
+                    onCheckedChange = { checked ->
+                        reminderDays = if (checked) {
+                            reminderDays + dayName
+                        } else {
+                            reminderDays - dayName
+                        }
+                        if (checked && reminderDays.size == 1) {
+                            scheduleReminders()
+                        }
+                    }
+                )
+                Text(text = dayName, modifier = Modifier.padding(start = 8.dp))
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Active reminders display
+        if (reminderDays.isNotEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "✅",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Recordatorios Activos",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Días: ${reminderDays.sortedBy { days.indexOfFirst { d -> d.first == it } }.joinToString(", ")}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "Hora: $reminderTime",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "🎬 Te notificaremos cuando sea hora de grabar tu video!",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Save button
+            Button(
+                onClick = { scheduleReminders() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("💾 Guardar Recordatorios")
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Clear button
+            OutlinedButton(
+                onClick = {
+                    reminderDays = emptySet()
+                    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    reminderDays.forEach { dayName ->
+                        val intent = Intent(context, ReminderBroadcastReceiver::class.java)
+                        val pendingIntent = PendingIntent.getBroadcast(
+                            context,
+                            dayName.hashCode(),
+                            intent,
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        )
+                        alarmManager.cancel(pendingIntent)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("🗑️ Eliminar Recordatorios")
+            }
+        } else {
+            // Empty state
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "📅",
+                        style = MaterialTheme.typography.displayMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "No hay recordatorios configurados",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Selecciona los días de la semana para recibir notificaciones",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Tips section
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "✅ Recordatorio configurado",
+                    text = "💡 Tips para ser consistente",
                     style = MaterialTheme.typography.titleSmall
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Días: ${reminderDays.joinToString(", ")}",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "• Graba varios videos en un día para tener stockpile",
+                    style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = "En la versión completa, recibirás notificaciones push.",
+                    text = "• Establece un horario fijo de grabación",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "• Trata la grabación como una cita importante",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
