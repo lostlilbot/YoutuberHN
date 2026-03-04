@@ -22,7 +22,7 @@ fun ActionDetailScreen(navController: NavHostController, actionType: String) {
                 style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(16.dp)
             )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            Divider(modifier = Modifier.padding(horizontal = 16.dp))
             
             when (actionType) {
                 "capitulo1" -> VideoTitlesAction()
@@ -47,7 +47,7 @@ fun ActionDetailScreen(navController: NavHostController, actionType: String) {
                 style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(16.dp)
             )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            Divider(modifier = Modifier.padding(horizontal = 16.dp))
             
             when {
                 actionType.contains("1") || actionType.contains("título") -> {

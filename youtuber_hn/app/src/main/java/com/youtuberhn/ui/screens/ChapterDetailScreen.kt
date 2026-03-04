@@ -35,7 +35,7 @@ fun ChapterDetailScreen(navController: NavHostController, chapterId: String) {
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                HorizontalDivider()
+                Divider()
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "ACCIÓN DEL DÍA",

@@ -98,7 +98,7 @@ fun CameraScreen(navController: NavHostController) {
             )
             IconButton(onClick = { useFrontCamera = !useFrontCamera }) {
                 Icon(
-                    imageVector = Icons.Default.Cameraswitch,
+                    imageVector = Icons.Default.Refresh,
                     contentDescription = "Cambiar cámara",
                     tint = Color.White
                 )
@@ -194,10 +194,9 @@ fun CameraScreen(navController: NavHostController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.CameraAlt,
-                        contentDescription = null,
-                        tint = Color.White,
+                    Text(
+                        text = "📹",
+                        style = MaterialTheme.typography.displayLarge,
                         modifier = Modifier.size(64.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -257,10 +256,9 @@ fun CameraScreen(navController: NavHostController) {
             IconButton(
                 onClick = { /* Open gallery */ }
             ) {
-                Icon(
-                    imageVector = Icons.Default.PhotoLibrary,
-                    contentDescription = "Galería",
-                    tint = Color.White,
+                Text(
+                    text = "🖼️",
+                    style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -319,7 +317,7 @@ fun CameraScreen(navController: NavHostController) {
             ) {
                 if (isRecording) {
                     Icon(
-                        imageVector = Icons.Default.Stop,
+                        imageVector = Icons.Default.Close,
                         contentDescription = "Detener",
                         tint = Color.White,
                         modifier = Modifier.size(36.dp)
@@ -338,7 +336,7 @@ fun CameraScreen(navController: NavHostController) {
                 onClick = { useFrontCamera = !useFrontCamera }
             ) {
                 Icon(
-                    imageVector = Icons.Default.FlipCameraAndroid,
+                    imageVector = Icons.Default.Refresh,
                     contentDescription = "Cambiar cámara",
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)

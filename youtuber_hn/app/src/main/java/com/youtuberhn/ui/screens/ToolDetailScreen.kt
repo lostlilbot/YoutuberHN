@@ -21,7 +21,7 @@ fun ToolDetailScreen(navController: NavHostController, toolId: String) {
                 style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(16.dp)
             )
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            Divider(modifier = Modifier.padding(horizontal = 16.dp))
             Column(
                 modifier = Modifier
                     .fillMaxSize()
