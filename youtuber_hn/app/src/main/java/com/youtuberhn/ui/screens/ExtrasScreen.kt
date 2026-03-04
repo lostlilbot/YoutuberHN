@@ -1,13 +1,18 @@
 package com.youtuberhn.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.youtuberhn.data.BookContent
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExtrasScreen(navController: NavHostController) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -30,7 +35,40 @@ fun ExtrasScreen(navController: NavHostController) {
             placeholder = { Text("Escribe una palabra...") }
         )
         
-        // Dark mode toggle
+        // Search results
+        if (searchQuery.isNotEmpty()) {
+            val matchingChapters = BookContent.chapters.filter { chapter ->
+                chapter.title.contains(searchQuery, ignoreCase = true) ||
+                chapter.content.contains(searchQuery, ignoreCase = true) ||
+                chapter.actionTitle.contains(searchQuery, ignoreCase = true)
+            }
+            
+            if (matchingChapters.isNotEmpty()) {
+                Text(
+                    text = "Resultados de búsqueda: ${matchingChapters.size} capítulo(s) encontrado(s)",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(matchingChapters) { chapter ->
+                        SearchResultItem(
+                            chapterTitle = chapter.title,
+                            searchQuery = searchQuery,
+                            onClick = { navController.navigate("chapter/${chapter.id}") }
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    text = "No se encontraron resultados para \"$searchQuery\"",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
         var isDarkMode by remember { mutableStateOf(false) }
         Row(
             modifier = Modifier
@@ -106,6 +144,32 @@ fun ExtrasScreen(navController: NavHostController) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchResultItem(chapterTitle: String, searchQuery: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        onClick = onClick
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = chapterTitle,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Toca para ver el capítulo completo",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
